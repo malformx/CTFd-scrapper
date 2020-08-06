@@ -22,13 +22,19 @@ def colo(txt, color):
 	return (fg(color) + attr('bold') + txt + '\n')
 
 url = args.i
+title = url.strip('http://') if url.startswith('http') else url.strip('https://')
 ses = session()
 
 if not url.startswith('http') or not url.startswith('https'):
 	url = 'https://' + url
 
-res = ses.get(url).text
-nonce = re.findall("'csrfNonce': \"(.*)\",", res)
+try:
+	res = ses.get(url).text
+	nonce = re.findall("'csrfNonce': \"(.*)\",", res)
+except:
+	url = 'http://' + url.strip('https://')
+	res = ses.get(url).text
+	nonce = re.findall("'csrfNonce': \"(.*)\",", res)
 
 login = {
 	'name': args.u,
@@ -77,25 +83,25 @@ for i in info:
 	if desc:
 		print(colo('Challenge description : ' + desc , 'green'))
 	if hint:
-		print(colo('Hints : ' + ','.join(i for i in desc) , 'violet'))
+		print(colo('Hints : ' + ','.join(i for i in hint) , 'violet'))
 	
 	if files:
 		files = [url+i for i in files]
 		print(colo('Files included : ' + ', '.join(files) , 'white'))
 		if args.d :
-			if args.i not in os.listdir(args.d):
-				os.makedirs(args.d+ '/' + args.i)
+			if title not in os.listdir(args.d):
+				os.makedirs(args.d+ '/' + title)
 
 			if not args.d.endswith('/'):
 				args.d = args.d + '/'
 
-			current_dir = args.d + args.i + '/'
+			current_dir = args.d + title + '/'
 			
 			overall = open(current_dir + 'totaldump', 'a+')
 			overall.write('Name: ' + name + '\n' + 'Category: '+category + '\n' + 'Description: ' + desc + '\n' + 'Hints:' + ', '.join(h for h in hint) + '\n' +'Files: ' + ', '.join(f for f in files) + '\n--------------------------------------------\n')
 			overall.close()
 
-			path = current_dir + args.d + '/' if not args.d.startswith('/') else args.d+args.i+'/'
+			path = current_dir + args.d + '/' if not args.d.startswith('/') else args.d+title+'/'
 
 			if category not in os.listdir(path):
 				path +=  category
