@@ -82,46 +82,40 @@ for i in info:
 
 	if desc:
 		print(colo('Challenge description : ' + desc , 'green'))
+	
 	if hint:
-		print(colo('Hints : ' + ','.join(i for i in hint) , 'violet'))
+		print(colo('Hints : ' + ",".join([h['content'] for h in hint]) , 'violet'))
 	
 	if files:
 		files = [url+i for i in files]
 		print(colo('Files included : ' + ', '.join(files) , 'white'))
+		
 		if args.d :
-			if title not in os.listdir(args.d):
-				os.makedirs(args.d+ '/' + title)
-
-			if not args.d.endswith('/'):
-				args.d = args.d + '/'
-
-			current_dir = args.d + title + '/'
+			# print ("argsssss: "+ args.d) # debug
 			
-			overall = open(current_dir + 'totaldump', 'a+')
-			overall.write('Name: ' + name + '\n' + 'Category: '+category + '\n' + 'Description: ' + desc + '\n' + 'Hints:' + ', '.join(h for h in hint) + '\n' +'Files: ' + ', '.join(f for f in files) + '\n--------------------------------------------\n')
+			if not os.path.isdir(args.d):
+				os.mkdir(args.d)
+
+			current_dir = args.d	
+			path = current_dir
+
+			overall = open(path + "/" + 'totaldump', 'a+')
+			overall.write('Name: ' + name + '\n' + 'Category: '+category + '\n' + 'Description: ' + desc + '\n' + 'Hints:' + ",".join([h['content'] for h in hint]) + '\n' +'Files: ' + ', '.join(f for f in files) + '\n--------------------------------------------\n')
 			overall.close()
 
-			path = current_dir + args.d + '/' if not args.d.startswith('/') else args.d+title+'/'
+			chall_dir = path + "/" + category + "/" + name + "/"
+			os.makedirs(chall_dir)
 
-			if category not in os.listdir(path):
-				path +=  category
-				os.makedirs(path)
-			else:
-				path += category
-
-			if name not in os.listdir(path):
-				path += '/' + name
-				os.makedirs(path)
-			else:
-				path += '/' + name
-
-			for c in range(len(files)):
-				f = open(path+'/'+name+str(c), 'wb')
-				r = ses.get(files[c]).text
-				f.write(bytes(r, encoding='utf8'))
+			for c in files:
+				print (c)
+				chall_namee= re.findall("(/.*?){6}(.*?)\?token", c)[0][1]
+				print (chall_namee)
+				f = open(chall_dir + chall_namee, 'wb')
+				r = ses.get(c).content
+				f.write(r)
 				f.close
-				rme = open(path+'/'+'README', 'wb')
-				rme.write(bytes(desc, encoding='utf8'))
+				rme = open(chall_dir+'/'+'README', 'wb')
+				rme.write(bytes(desc + "\nHint: "+",".join([h['content'] for h in hint]) , encoding='utf8'))
 				rme.close()
 
 	print (colo('\n-----------------------------------------------------------------\n', 'white'))
