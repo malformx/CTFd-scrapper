@@ -90,9 +90,7 @@ for i in info:
 		files = [url+i for i in files]
 		print(colo('Files included : ' + ', '.join(files) , 'white'))
 		
-		if args.d :
-			# print ("argsssss: "+ args.d) # debug
-			
+		if args.d :	
 			if not os.path.isdir(args.d):
 				os.mkdir(args.d)
 
@@ -109,7 +107,6 @@ for i in info:
 			for c in files:
 				print (c)
 				chall_namee= re.findall("(/.*?){6}(.*?)\?token", c)[0][1]
-				print (chall_namee)
 				f = open(chall_dir + chall_namee, 'wb')
 				r = ses.get(c).content
 				f.write(r)
